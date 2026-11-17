@@ -1,0 +1,27 @@
+#!/bin/bash
+set -euo pipefail
+
+REGION="${region}"
+REGISTRY="${ecr_registry}"
+IMAGE_REPOSITORY="${ecr_repository_url}"
+IMAGE_TAG_PARAMETER="${image_tag_parameter_name}"
+CONTAINER_PORT="${container_port}"
+
+dnf install -y docker
+systemctl enable --now docker
+
+aws ecr get-login-password --region "$REGION" \
+  | docker login --username AWS --password-stdin "$REGISTRY"
+
+IMAGE_TAG=$(aws ssm get-parameter \
+  --region "$REGION" \
+  --name "$IMAGE_TAG_PARAMETER" \
+  --query "Parameter.Value" \
+  --output text)
+
+docker pull "$IMAGE_REPOSITORY:$IMAGE_TAG"
+docker run -d \
+  --name app \
+  --restart unless-stopped \
+  -p "$CONTAINER_PORT:$CONTAINER_PORT" \
+  "$IMAGE_REPOSITORY:$IMAGE_TAG"

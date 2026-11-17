@@ -1,0 +1,27 @@
+# Provider plugins and downloaded modules (recreated by `terraform init`)
+.terraform/
+
+# Local state (may contain sensitive values)
+*.tfstate
+*.tfstate.*
+
+# Crash logs
+crash.log
+crash.*.log
+
+# Local override files
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Saved plans
+*.tfplan
+tfplan
+
+# CLI config
+.terraformrc
+terraform.rc
+
+# NOTE: .terraform.lock.hcl is intentionally NOT ignored - commit it so
+# provider versions are pinned for everyone.

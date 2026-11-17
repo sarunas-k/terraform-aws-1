@@ -1,0 +1,120 @@
+# ---------------------------
+# S3 bucket for website
+# ---------------------------
+resource "aws_s3_bucket" "this" {
+  bucket = var.bucket_name
+}
+
+resource "aws_s3_bucket_versioning" "this" {
+  bucket = aws_s3_bucket.this.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_public_access_block" "this" {
+  bucket = aws_s3_bucket.this.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+# ---------------------------
+# Policy document to allow CloudFront to read website from S3
+# ---------------------------
+data "aws_iam_policy_document" "this" {
+  statement {
+    sid       = "AllowCloudFrontRead"
+    effect    = "Allow"
+    actions   = ["s3:GetObject"]
+    resources = ["${aws_s3_bucket.this.arn}/*"]
+
+    principals {
+      type        = "Service"
+      identifiers = ["cloudfront.amazonaws.com"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "AWS:SourceArn"
+      values   = [module.cdn.cloudfront_distribution_arn]
+    }
+  }
+}
+
+# ---------------------------
+# S3 bucket policy
+# ---------------------------
+resource "aws_s3_bucket_policy" "this" {
+  bucket = aws_s3_bucket.this.id
+  policy = data.aws_iam_policy_document.this.json
+
+  depends_on = [aws_s3_bucket_public_access_block.this]
+}
+
+# ---------------------------
+# S3 bucket files for website with correct content type assigned
+# ---------------------------
+locals {
+  content_types = {
+    html  = "text/html"
+    css   = "text/css"
+  }
+}
+
+resource "aws_s3_object" "content" {
+  for_each = fileset(var.content_dir, "**")
+
+  bucket       = aws_s3_bucket.this.id
+  key          = each.value
+  source       = "${var.content_dir}/${each.value}"
+  etag         = filemd5("${var.content_dir}/${each.value}")
+  content_type = lookup(local.content_types, lower(try(regex("\\.([^.]+)$", each.value)[0], "")), "application/octet-stream")
+}
+
+# ---------------------------
+# CloudFront distribution
+# ---------------------------
+module "cdn" {
+  source = "terraform-aws-modules/cloudfront/aws"
+
+  aliases             = [var.domain_name]
+  enabled             = true
+  is_ipv6_enabled     = true
+  price_class         = var.price_class
+  default_root_object = "index.html"
+
+  origin_access_control = {
+    s3_oac = {
+      origin_type      = "s3"
+      signing_behavior = "always"
+      signing_protocol = "sigv4"
+    }
+  }
+
+  origin = {
+    s3 = {
+      domain_name               = aws_s3_bucket.this.bucket_regional_domain_name
+      origin_access_control_key = "s3_oac"
+    }
+  }
+
+  default_cache_behavior = {
+    target_origin_id       = "s3"
+    viewer_protocol_policy = "redirect-to-https"
+
+    allowed_methods = ["GET", "HEAD"]
+    cached_methods  = ["GET", "HEAD"]
+    compress        = true
+
+    cache_policy_name = var.cache_policy_name
+  }
+
+  viewer_certificate = {
+    acm_certificate_arn      = var.certificate_arn
+    ssl_support_method       = "sni-only"
+    minimum_protocol_version = "TLSv1.2_2021"
+  }
+}
