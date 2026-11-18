@@ -17,7 +17,6 @@ vpc_public_subnets  = ["10.0.101.0/24", "10.0.102.0/24", "10.0.103.0/24"]
 # Elastic Container Registry
 # ---------------------------
 ecr_repository_name        = "app"
-ecr_read_write_access_arns = ["arn:aws:iam::878947868165:user/sarunas"]
 
 # ---------------------------
 # Auto Scaling Group

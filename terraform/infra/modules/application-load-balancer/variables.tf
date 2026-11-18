@@ -22,3 +22,9 @@ variable "certificate_arn" {
   description = "ARN of the ACM certificate for the HTTPS listener. Must be in the same region as the ALB"
   type        = string
 }
+
+variable "enable_deletion_protection" {
+  description = "Whether AWS blocks deletion of the load balancer"
+  type        = bool
+  default     = true
+}

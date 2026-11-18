@@ -4,6 +4,7 @@ module "alb" {
   depends_on = [aws_s3_bucket_policy.access_logs]
 
   name    = var.name
+  enable_deletion_protection = var.enable_deletion_protection
   vpc_id  = var.vpc_id
   subnets = var.subnets
 

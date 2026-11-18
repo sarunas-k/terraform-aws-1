@@ -7,13 +7,6 @@ module "vpc" {
   public_subnets  = var.vpc_public_subnets
 }
 
-module "elastic_container_registry" {
-  source = "./modules/elastic-container-registry"
-
-  name                   = var.ecr_repository_name
-  read_write_access_arns = var.ecr_read_write_access_arns
-}
-
 module "auto_scaling_group" {
   source = "./modules/auto-scaling-group"
 
@@ -27,7 +20,7 @@ module "auto_scaling_group" {
   max_size         = var.asg_max_size
   desired_capacity = var.asg_desired_capacity
 
-  ecr_repository_url       = module.elastic_container_registry.repository_url
+  ecr_repository_url       = data.aws_ecr_repository.app.repository_url
   image_tag_parameter_name = var.asg_image_tag_parameter_name
   image_tag_initial        = var.asg_image_tag_initial
 
@@ -55,5 +48,8 @@ module "application_load_balancer" {
   subnets                 = module.vpc.public_subnet_ids
   access_logs_bucket_name = var.alb_logs_bucket_name
   certificate_arn         = var.certificate_arn
+
+  # Lets this root be destroyed for demo purposes
+  enable_deletion_protection = false
 }
 

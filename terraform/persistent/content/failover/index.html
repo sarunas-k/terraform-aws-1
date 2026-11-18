@@ -73,7 +73,7 @@
     .ref-on { stroke: var(--green); stroke-width: 2; fill: none; stroke-dasharray: 3 4; }
     .m-acc { fill: var(--accent); } .m-mute { fill: var(--mute); } .m-on { fill: var(--green); }
     .badge { fill: var(--accent); }
-    .badge-t { fill: #fff; font-size: 12px; font-weight: 700; text-anchor: middle; dominant-baseline: central; }
+    .badge-t { fill: #fff; font-size: 15px; font-weight: 700; text-anchor: middle; dominant-baseline: central; }
   </style>
 </head>
 <body>
@@ -82,19 +82,19 @@
     <h1>Hi</h1>
 
     <section>
-      <p class="key">You were routed to failover site by Route 53</p>
-      <p class="note">The primary app is kept terminated to save cost. See the infrastructure diagram below to see how it works</p>
+      <p class="key">Route 53 routed you to the failover page</p>
+      <p class="note">The primary environment is shut down to save cost</p>
     </section>
 
     <section>
-      <p class="key">You can deploy primary application yourself</p>
+      <p class="key">You can deploy the primary environment yourself</p>
       <p class="note">Click to start Terraform job. It is destroyed automatically after 30 minutes</p>
-      <p><button type="button" disabled>Deploy primary app (30 min)</button></p>
+      <p><button type="button" disabled>Deploy primary environment</button></p>
     </section>
   </div>
 
   <div class="scroll">
-  <svg viewBox="0 0 1200 1290" role="img" aria-labelledby="dg-title dg-desc">
+  <svg viewBox="0 0 1200 1310" role="img" aria-labelledby="dg-title dg-desc">
     <title id="dg-title">Request path from a user's device to the Route 53 failover site</title>
     <desc id="dg-desc">The device asks a DNS resolver, which queries Route 53. The primary record points to the Application Load Balancer in the VPC, which is currently down. Behind it, shown greyed out, the VPC spans three availability zones, each with a public subnet and a private subnet. The load balancer, with its listeners and target group and its HTTPS certificate from ACM, spans the public subnets and forwards to one EC2 instance per zone in an Auto Scaling group, which is defined by a launch template. The instances pull their container image from ECR through VPC endpoints. Because the primary is down, the secondary record to CloudFront is used. The device connects to CloudFront over HTTPS using an ACM certificate. CloudFront uses origin access control to fetch the website files from a private S3 bucket.</desc>
     <defs>
@@ -102,6 +102,23 @@
       <marker id="a-mute" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="m-mute"/></marker>
       <marker id="a-on" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="m-on"/></marker>
     </defs>
+
+    <!-- ===== Legend ===== -->
+    <g transform="translate(-292 11)">
+    <rect class="card" x="600" y="6" width="584" height="36" rx="8"/>
+    <text class="gh" x="614" y="24" style="dominant-baseline:central">Legend</text>
+    <path class="req" d="M684 24 H728" marker-end="url(#a-acc)"/>
+    <text class="lbl-l" x="738" y="24" style="dominant-baseline:central">Request</text>
+    <path class="resp" d="M810 24 H854" marker-end="url(#a-acc)"/>
+    <text class="lbl-l" x="864" y="24" style="dominant-baseline:central">Response</text>
+    <path class="ref" d="M944 24 H988" marker-end="url(#a-mute)"/>
+    <text class="lbl-l" x="998" y="24" style="dominant-baseline:central">Association</text>
+    <circle class="badge" cx="1094" cy="24" r="12"/>
+    <text class="badge-t" x="1094" y="24" >n</text>
+    <text class="lbl-l" x="1114" y="24" style="dominant-baseline:central">Step order</text>
+    </g>
+
+    <g transform="translate(0 20)">
 
     <!-- ===== Boundaries ===== -->
     <rect class="zone" x="16" y="50" width="200" height="290" rx="10"/>
@@ -271,26 +288,13 @@
     <text class="gh-off" x="334" y="512">Amazon ECR</text>
     <text class="gs-off" x="334" y="527">Container images · eu-north-1</text>
 
-    <!-- ===== Legend ===== -->
-    <rect class="card" x="16" y="370" width="200" height="134" rx="8"/>
-    <text class="gh" x="30" y="392">Legend</text>
-    <path class="req" d="M30 416 H74" marker-end="url(#a-acc)"/>
-    <text class="lbl-l" x="86" y="420">Request</text>
-    <path class="resp" d="M30 438 H74" marker-end="url(#a-acc)"/>
-    <text class="lbl-l" x="86" y="442">Response</text>
-    <path class="ref" d="M30 460 H74" marker-end="url(#a-mute)"/>
-    <text class="lbl-l" x="86" y="464">Association</text>
-    <circle class="badge" cx="52" cy="482" r="9"/>
-    <text class="badge-t" x="52" y="482" style="font-size:10px">n</text>
-    <text class="lbl-l" x="86" y="486">Step order</text>
-
     <!-- ===== Flow arrows ===== -->
     <!-- 1 device -> resolver -->
     <path class="req" d="M116 155 V238" marker-end="url(#a-acc)"/>
     <!-- 2 resolver -> hosted zone -->
     <path class="req" d="M200 262 H282" marker-end="url(#a-acc)"/>
-    <!-- 3 DNS answer -->
-    <path class="resp" d="M284 292 H202" marker-end="url(#a-acc)"/>
+    <!-- 3 DNS answer: from the secondary record -->
+    <path class="resp" d="M296 397 H250 V292 H202" marker-end="url(#a-acc)"/>
     <!-- ACM attached -->
     <path class="ref" d="M730 482 V446" marker-end="url(#a-mute)"/>
     <text class="lbl-l" x="740" y="468">attached</text>
@@ -317,12 +321,13 @@
 
     <!-- ===== Step badges ===== -->
     <g>
-      <circle class="badge" cx="116" cy="196" r="10"/><text class="badge-t" x="116" y="196">1</text>
-      <circle class="badge" cx="240" cy="262" r="10"/><text class="badge-t" x="240" y="262">2</text>
-      <circle class="badge" cx="240" cy="292" r="10"/><text class="badge-t" x="240" y="292">3</text>
-      <circle class="badge" cx="560" cy="120" r="10"/><text class="badge-t" x="560" y="120">4</text>
-      <circle class="badge" cx="895" cy="366" r="10"/><text class="badge-t" x="895" y="366">5</text>
-      <circle class="badge" cx="560" cy="100" r="10"/><text class="badge-t" x="560" y="100">6</text>
+      <circle class="badge" cx="116" cy="196" r="13"/><text class="badge-t" x="116" y="196">1</text>
+      <circle class="badge" cx="240" cy="262" r="13"/><text class="badge-t" x="240" y="262">2</text>
+      <circle class="badge" cx="250" cy="345" r="13"/><text class="badge-t" x="250" y="345">3</text>
+      <circle class="badge" cx="590" cy="120" r="13"/><text class="badge-t" x="590" y="120">4</text>
+      <circle class="badge" cx="895" cy="366" r="13"/><text class="badge-t" x="895" y="366">5</text>
+      <circle class="badge" cx="530" cy="100" r="13"/><text class="badge-t" x="530" y="100">6</text>
+    </g>
     </g>
   </svg>
   </div>

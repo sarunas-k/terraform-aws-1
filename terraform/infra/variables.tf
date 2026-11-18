@@ -33,10 +33,6 @@ variable "ecr_repository_name" {
   type        = string
 }
 
-variable "ecr_read_write_access_arns" {
-  description = "ARNs of the IAM users/roles allowed to push and pull images in the ECR repository"
-  type        = list(string)
-}
 
 variable "asg_name" {
   description = "Name of the Auto Scaling Group"
