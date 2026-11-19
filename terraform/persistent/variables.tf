@@ -32,3 +32,8 @@ variable "ecr_read_write_access_arns" {
   description = "ARNs of the IAM users/roles allowed to push and pull images in the ECR repository"
   type        = list(string)
 }
+
+variable "github_repo" {
+  description = "Name of GitHub repository where Terraform pipeline will run"
+  type        = string
+}

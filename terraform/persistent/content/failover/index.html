@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Route 53 failover site</title>
+  <title>Route 53 failover page</title>
   <style>
     :root {
       --bg: #ffffff; --fg: #16191f; --sub: #545b64; --card: #f7f8fa; --line: #aab7b8;
@@ -95,8 +95,8 @@
 
   <div class="scroll">
   <svg viewBox="0 0 1200 1310" role="img" aria-labelledby="dg-title dg-desc">
-    <title id="dg-title">Request path from a user's device to the Route 53 failover site</title>
-    <desc id="dg-desc">The device asks a DNS resolver, which queries Route 53. The primary record points to the Application Load Balancer in the VPC, which is currently down. Behind it, shown greyed out, the VPC spans three availability zones, each with a public subnet and a private subnet. The load balancer, with its listeners and target group and its HTTPS certificate from ACM, spans the public subnets and forwards to one EC2 instance per zone in an Auto Scaling group, which is defined by a launch template. The instances pull their container image from ECR through VPC endpoints. Because the primary is down, the secondary record to CloudFront is used. The device connects to CloudFront over HTTPS using an ACM certificate. CloudFront uses origin access control to fetch the website files from a private S3 bucket.</desc>
+    <title id="dg-title">Request path from a user's device to the Route 53 failover page</title>
+    <desc id="dg-desc">The device asks a DNS resolver, which queries Route 53. The primary record points to the Application Load Balancer in the VPC, which is currently shut down. Behind it, shown greyed out, the VPC spans three availability zones, each with a public subnet and a private subnet. The load balancer, with its listeners and target group and its HTTPS certificate from ACM, spans the public subnets and forwards to one EC2 instance per zone in an Auto Scaling group, which is defined by a launch template. The instances pull their container image from ECR through VPC endpoints. Because the primary environment is shut down, the secondary record to CloudFront is used. The device connects to CloudFront over HTTPS using an ACM certificate. CloudFront uses origin access control to fetch the failover page files from a private S3 bucket.</desc>
     <defs>
       <marker id="a-acc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="m-acc"/></marker>
       <marker id="a-mute" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="m-mute"/></marker>
@@ -197,7 +197,7 @@
     <text class="cs" x="956" y="303">Reachable only via CloudFront</text>
 
     <rect class="card" x="944" y="349" width="196" height="70" rx="6"/>
-    <text class="ct" x="956" y="373">Website source files</text>
+    <text class="ct" x="956" y="373">Failover page source files</text>
     <text class="cs" x="956" y="393">index.html</text>
 
     <!-- ===== ACM ===== -->
@@ -232,7 +232,7 @@
     <rect class="chip-off" x="278" y="726" width="26" height="26" rx="4"/>
     <text class="chip-t" x="291" y="743">ALB</text>
     <text class="gh-off" x="312" y="738">Application Load Balancer</text>
-    <text class="gs-off" x="312" y="753">Primary site</text>
+    <text class="gs-off" x="312" y="753">Primary environment</text>
     <rect class="down-pill" x="278" y="762" width="96" height="22" rx="11"/>
     <text class="down-t" x="326" y="773">UNHEALTHY</text>
     <text class="down-note" x="278" y="802">Currently not serving traffic</text>
@@ -281,7 +281,7 @@
     <text class="ct-off" x="564" y="1179">VPC endpoints</text>
     <text class="cs-off" x="564" y="1194">ECR and SSM access</text>
 
-    <!-- ===== ECR (managed, greyed: only used by the primary site) ===== -->
+    <!-- ===== ECR (managed, greyed: only used by the primary environment) ===== -->
     <rect class="grp-off" x="290" y="484" width="240" height="96" rx="10"/>
     <rect class="chip-off" x="302" y="494" width="26" height="26" rx="4"/>
     <text class="chip-t" x="315" y="511">ECR</text>

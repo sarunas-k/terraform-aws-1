@@ -14,8 +14,14 @@ dns_record_name = "aws1.dev.saruno.lt"
 # Failover site
 # ---------------------------
 failover_site_bucket = "failover-site-bucket-89234146"
+
 # ---------------------------
 # Elastic Container Registry
 # ---------------------------
 ecr_repository_name        = "app"
 ecr_read_write_access_arns = ["arn:aws:iam::878947868165:user/sarunas"]
+
+# ---------------------------
+# GitHub Actions pipelines
+# ---------------------------
+github_repo         = "sarunas-k/terraform-aws-1"
