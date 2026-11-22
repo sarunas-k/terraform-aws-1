@@ -7,9 +7,13 @@ module "failover_site" {
   bucket_name     = var.failover_site_bucket
   domain_name     = var.dns_record_name
   certificate_arn = module.acm_cloudfront.acm_certificate_arn
-  content_dir     = "${path.module}/content/failover"
 
-  # No caching while the site is in development. Remove this line to use the default (CachingOptimized)
+  generated_files = {
+    "index.html" = templatefile("${path.module}/templates/failover/index.html.tftpl", {
+      infra_control_url = aws_lambda_function_url.infra_control.function_url
+    })
+  }
+
   cache_policy_name = "Managed-CachingDisabled"
 }
 

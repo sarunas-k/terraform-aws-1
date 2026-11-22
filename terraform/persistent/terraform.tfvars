@@ -24,4 +24,5 @@ ecr_read_write_access_arns = ["arn:aws:iam::878947868165:user/sarunas"]
 # ---------------------------
 # GitHub Actions pipelines
 # ---------------------------
-github_repo         = "sarunas-k/terraform-aws-1"
+github_repo            = "sarunas-k/terraform-aws-1"
+github_oidc_sub_prefix = "repo:sarunas-k@18898564/terraform-aws-1@1461519093"

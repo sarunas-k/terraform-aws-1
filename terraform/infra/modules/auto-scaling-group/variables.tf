@@ -64,6 +64,12 @@ variable "container_port" {
     default     = 8080
 }
 
+variable "infra_control_url" {
+  description = "Function URL of the infra-control Lambda, passed to the app container"
+  type        = string
+  default     = ""
+}
+
 variable "target_group_arn" {
   description = "ARN of the Application Load Balancer target group the instances are registered with"
   type        = string

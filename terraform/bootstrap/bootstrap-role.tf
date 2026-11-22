@@ -83,3 +83,67 @@ output "bootstrap_role_arn" {
   description = "Use as role_arn in the S3 terraform backend"
   value       = aws_iam_role.bootstrap_role.arn
 }
+
+# ---------------------------
+# Policy document to read state files
+# ---------------------------
+data "aws_iam_policy_document" "bootstrap_role_read" {
+  statement {
+    effect    = "Allow"
+    actions   = ["s3:ListBucket"]
+    resources = [aws_s3_bucket.state_file_bucket.arn]
+  }
+
+  statement {
+    effect    = "Allow"
+    actions   = ["s3:GetObject"]
+    resources = [for key in var.state_file_keys_read : "${aws_s3_bucket.state_file_bucket.arn}/${key}"]
+  }
+}
+
+# ---------------------------
+# Policy to read state files
+# ---------------------------
+resource "aws_iam_policy" "bootstrap_role_read" {
+  name   = "bootstrap-role-read-access"
+  policy = data.aws_iam_policy_document.bootstrap_role_read.json
+}
+
+# ---------------------------
+# "Bootstrap read" role trust policy
+# ---------------------------
+data "aws_iam_policy_document" "bootstrap_role_read_trust_policy" {
+  statement {
+    effect  = "Allow"
+    actions = ["sts:AssumeRole"]
+
+    principals {
+      type        = "AWS"
+      identifiers = var.bootstrap_role_read_trusted_principal_arns
+    }
+  }
+}
+
+# ---------------------------
+# "Bootstrap read" role with trust policy
+# ---------------------------
+resource "aws_iam_role" "bootstrap_role_read" {
+  name               = "bootstrap-role-read"
+  assume_role_policy = data.aws_iam_policy_document.bootstrap_role_read_trust_policy.json
+}
+
+# ---------------------------
+# Policy attachment to "Bootstrap read" role
+# ---------------------------
+resource "aws_iam_role_policy_attachment" "bootstrap_role_read" {
+  role       = aws_iam_role.bootstrap_role_read.name
+  policy_arn = aws_iam_policy.bootstrap_role_read.arn
+}
+
+# ---------------------------
+# "Bootstrap read" role ARN output
+# ---------------------------
+output "bootstrap_role_read_arn" {
+  description = "Read-only state role, used as role_arn by plan jobs"
+  value       = aws_iam_role.bootstrap_role_read.arn
+}

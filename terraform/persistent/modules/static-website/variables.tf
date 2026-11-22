@@ -28,4 +28,11 @@ variable "cache_policy_name" {
 variable "content_dir" {
   description = "Local directory whose files are uploaded to the bucket"
   type        = string
+  default     = null
+}
+
+variable "generated_files" {
+  description = "Extra files to upload, as a map of object key to content"
+  type        = map(string)
+  default     = {}
 }

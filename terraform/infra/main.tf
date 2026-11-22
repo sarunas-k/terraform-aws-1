@@ -23,6 +23,7 @@ module "auto_scaling_group" {
   ecr_repository_url       = data.aws_ecr_repository.app.repository_url
   image_tag_parameter_name = var.asg_image_tag_parameter_name
   image_tag_initial        = var.asg_image_tag_initial
+  infra_control_url        = var.infra_control_url
 
   vpc_id              = module.vpc.vpc_id
   vpc_zone_identifier = module.vpc.private_subnet_ids

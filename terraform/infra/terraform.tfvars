@@ -28,7 +28,12 @@ asg_min_size                 = 3
 asg_max_size                 = 3
 asg_desired_capacity         = 3
 asg_image_tag_parameter_name = "/app/image-tag"
-asg_image_tag_initial        = "v1"
+asg_image_tag_initial        = "app-0b4362b24b86"
+
+# ---------------------------
+# Infra control
+# ---------------------------
+infra_control_url = "https://reu4izrlv5qburoakeip55hedi0wywtk.lambda-url.eu-north-1.on.aws/"
 
 # ---------------------------
 # DNS

@@ -27,6 +27,17 @@
     .key { font-size: 1.35rem; line-height: 1.4; }
     .note { color: var(--sub); text-wrap: balance; }
     .scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); }
+
+    .control { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 0 0 12px; }
+    .control input, .control button { font: inherit; padding: 8px 14px; border-radius: 6px; border: 1px solid var(--line); }
+    .control input { background: var(--bg); color: var(--fg); min-width: 12rem; }
+    .control button { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; cursor: pointer; }
+    .control button:disabled { opacity: .6; cursor: progress; }
+    .result { min-height: 1.5em; }
+    .result[data-kind="ok"] { color: var(--green); }
+    .result[data-kind="error"] { color: var(--red); }
+    .result a { color: var(--accent); }
+    .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
     svg { display: block; width: 100%; min-width: 900px; height: auto; }
 
     /* SVG theme classes */
@@ -88,8 +99,13 @@
 
     <section>
       <p class="key">You can deploy the primary environment yourself</p>
-      <p class="note">Click to start Terraform job. It is destroyed automatically after 30 minutes</p>
-      <p><button type="button" disabled>Deploy primary environment</button></p>
+      <p class="note">Enter the passcode to start the Terraform job. Deployment takes about 10 minutes. The environment is shut down automatically every day at 22:00 UTC</p>
+      <form id="wake-form" class="control" autocomplete="off" data-url="${infra_control_url}">
+        <label for="wake-passcode" class="visually-hidden">Passcode</label>
+        <input id="wake-passcode" name="passcode" type="password" placeholder="Passcode" required maxlength="200">
+        <button id="wake-button" type="submit">Deploy primary environment</button>
+      </form>
+      <p id="wake-result" class="result" role="status" aria-live="polite"></p>
     </section>
   </div>
 
@@ -332,5 +348,60 @@
   </svg>
   </div>
 </main>
+<script>
+(function () {
+  "use strict";
+
+  const form = document.getElementById("wake-form");
+  const passcode = document.getElementById("wake-passcode");
+  const button = document.getElementById("wake-button");
+  const result = document.getElementById("wake-result");
+  const baseUrl = form.dataset.url.replace(/\/+$/, "");
+
+  function show(message, kind, runUrl) {
+    result.textContent = message;
+    result.dataset.kind = kind;
+    if (runUrl) {
+      const link = document.createElement("a");
+      link.href = runUrl;
+      link.textContent = "View the run on GitHub";
+      link.rel = "noopener";
+      result.append(" ", link);
+    }
+  }
+
+  form.addEventListener("submit", async function (event) {
+    event.preventDefault();
+    if (!passcode.value) {
+      show("Enter the passcode first.", "error");
+      return;
+    }
+    button.disabled = true;
+    show("Sending...", "info");
+
+    try {
+      const response = await fetch(baseUrl + "/wake", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ passcode: passcode.value }),
+      });
+      const data = await response.json().catch(() => ({}));
+      const fallback = response.status === 429
+        ? "Busy, please try again in a few seconds."
+        : "Unexpected response (" + response.status + ").";
+      const message = data.message || fallback;
+
+      show(message, response.ok ? "ok" : "error", data.runUrl);
+      if (response.ok) {
+        passcode.value = "";
+      }
+    } catch (error) {
+      show("Could not reach the service. Check your connection and try again.", "error");
+    } finally {
+      button.disabled = false;
+    }
+  });
+})();
+</script>
 </body>
 </html>

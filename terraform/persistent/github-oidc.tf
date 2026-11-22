@@ -28,7 +28,7 @@ data "aws_iam_policy_document" "github_actions_apply_trust_policy" {
     condition {
       test     = "StringEquals"
       variable = "token.actions.githubusercontent.com:sub"
-      values   = ["repo:${var.github_repo}:ref:refs/heads/main"]
+      values   = ["${var.github_oidc_sub_prefix}:ref:refs/heads/main"]
     }
   }
 }
@@ -55,7 +55,7 @@ data "aws_iam_policy_document" "github_actions_plan_trust_policy" {
     condition {
       test     = "StringEquals"
       variable = "token.actions.githubusercontent.com:sub"
-      values   = ["repo:${var.github_repo}:pull_request"]
+      values   = ["${var.github_oidc_sub_prefix}:pull_request"]
     }
   }
 }
@@ -99,7 +99,7 @@ data "aws_iam_policy_document" "github_actions_apply_policy" {
       values   = [var.aws_region]
     }
   }
-  
+
   # ---------------------------
   # IAM Read Only
   # ---------------------------
@@ -202,7 +202,7 @@ data "aws_iam_policy_document" "github_actions_apply_policy" {
       values   = distinct([var.aws_region, "us-east-1"])
     }
   }
-  
+
   # ---------------------------
   # Route53 and CloudFront
   # ---------------------------
@@ -215,7 +215,7 @@ data "aws_iam_policy_document" "github_actions_apply_policy" {
     ]
     resources = ["*"]
   }
-  
+
   # ---------------------------
   # Container Registry
   # ---------------------------
@@ -225,7 +225,7 @@ data "aws_iam_policy_document" "github_actions_apply_policy" {
     actions   = ["ecr:*"]
     resources = ["arn:aws:ecr:${var.aws_region}:${local.account_id}:repository/*"]
   }
-  
+
   # ---------------------------
   # S3
   # ---------------------------
@@ -278,10 +278,10 @@ resource "aws_iam_role_policy" "github_actions_apply" {
 # ---------------------------
 data "aws_iam_policy_document" "github_actions_plan_policy" {
   statement {
-    sid       = "AssumeStateRole"
+    sid       = "AssumeReadOnlyStateRole"
     effect    = "Allow"
     actions   = ["sts:AssumeRole"]
-    resources = ["arn:aws:iam::${local.account_id}:role/bootstrap-role"]
+    resources = ["arn:aws:iam::${local.account_id}:role/bootstrap-role-read"]
   }
 }
 

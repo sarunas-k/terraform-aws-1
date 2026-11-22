@@ -60,6 +60,7 @@ module "auto_scaling_group" {
     ecr_repository_url       = var.ecr_repository_url
     image_tag_parameter_name = var.image_tag_parameter_name
     container_port           = var.container_port
+    infra_control_url        = var.infra_control_url
   }))
 
   create_iam_instance_profile = false

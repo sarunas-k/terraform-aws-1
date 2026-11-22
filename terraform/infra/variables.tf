@@ -74,6 +74,12 @@ variable "asg_image_tag_initial" {
   type        = string
 }
 
+variable "infra_control_url" {
+  description = "Function URL of the infra-control Lambda. Empty hides the app's shut-down button"
+  type        = string
+  default     = ""
+}
+
 variable "dns_zone_name" {
   description = "Name of the existing public hosted zone created by the dns/ root"
   type        = string

@@ -4,12 +4,157 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Availability Zone</title>
-  <link rel="stylesheet" href="/static/style.css">
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      display: grid;
+      place-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    main {
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 3rem;
+      margin: 0.25em 0;
+    }
+
+    .control-box {
+      margin-top: 3rem;
+      max-width: 32rem;
+    }
+
+    .note {
+      color: #545b64;
+    }
+
+    .control {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+    }
+
+    .control input,
+    .control button {
+      font: inherit;
+      padding: 8px 14px;
+      border-radius: 6px;
+      border: 1px solid #aab7b8;
+    }
+
+    .control button {
+      background: #c8203a;
+      border-color: #c8203a;
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .control button:disabled {
+      opacity: 0.6;
+      cursor: progress;
+    }
+
+    .result {
+      min-height: 1.5em;
+    }
+
+    .result[data-kind="ok"] {
+      color: #4f7a0a;
+    }
+
+    .result[data-kind="error"] {
+      color: #c8203a;
+    }
+
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
+  </style>
 </head>
 <body>
   <main>
     <p>This response was served from availability zone</p>
     <h1>{{ availability_zone }}</h1>
+
+    {% if infra_control_url %}
+    <section class="control-box">
+      <p class="note">The environment is shut down automatically every day at 22:00 UTC. You can shut it down now with the passcode.</p>
+      <form id="destroy-form" class="control" autocomplete="off" data-url="{{ infra_control_url }}">
+        <label for="destroy-passcode" class="visually-hidden">Passcode</label>
+        <input id="destroy-passcode" name="passcode" type="password" placeholder="Passcode" required maxlength="200">
+        <button id="destroy-button" type="submit">Shut down environment</button>
+      </form>
+      <p id="destroy-result" class="result" role="status" aria-live="polite"></p>
+    </section>
+    <script>
+      (function () {
+        "use strict";
+
+        const form = document.getElementById("destroy-form");
+        const passcode = document.getElementById("destroy-passcode");
+        const button = document.getElementById("destroy-button");
+        const result = document.getElementById("destroy-result");
+        const baseUrl = form.dataset.url.replace(/\/+$/, "");
+
+        function show(message, kind, runUrl) {
+          result.textContent = message;
+          result.dataset.kind = kind;
+          if (runUrl) {
+            const link = document.createElement("a");
+            link.href = runUrl;
+            link.textContent = "View the run on GitHub";
+            link.rel = "noopener";
+            result.append(" ", link);
+          }
+        }
+
+        form.addEventListener("submit", async function (event) {
+          event.preventDefault();
+          if (!passcode.value) {
+            show("Enter the passcode first.", "error");
+            return;
+          }
+          if (!window.confirm("Shut down the primary environment now?")) {
+            return;
+          }
+          button.disabled = true;
+          show("Sending...", "info");
+
+          try {
+            const response = await fetch(baseUrl + "/destroy", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ passcode: passcode.value }),
+            });
+            const data = await response.json().catch(() => ({}));
+            const fallback = response.status === 429
+              ? "Busy, please try again in a few seconds."
+              : "Unexpected response (" + response.status + ").";
+            const message = data.message || fallback;
+
+            show(message, response.ok ? "ok" : "error", data.runUrl);
+            if (response.ok) {
+              passcode.value = "";
+            }
+          } catch (error) {
+            show("Could not reach the service. Check your connection and try again.", "error");
+          } finally {
+            button.disabled = false;
+          }
+        });
+      })();
+    </script>
+    {% endif %}
   </main>
 </body>
 </html>

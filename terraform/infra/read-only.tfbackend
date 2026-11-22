@@ -1,0 +1,3 @@
+assume_role = {
+  role_arn = "arn:aws:iam::878947868165:role/bootstrap-role-read"
+}

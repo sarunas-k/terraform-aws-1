@@ -37,3 +37,25 @@ variable "github_repo" {
   description = "Name of GitHub repository where Terraform pipeline will run"
   type        = string
 }
+
+variable "infra_control_destroy_schedule" {
+  description = "Schedule expression for the daily shutdown of the primary environment"
+  type        = string
+  default     = "cron(0 22 * * ? *)"
+}
+
+variable "infra_control_cooldown_seconds" {
+  description = "Minimum seconds between two deploys or shutdowns"
+  type        = number
+  default     = 600
+}
+
+variable "github_oidc_sub_prefix" {
+  description = "Prefix of the GitHub OIDC sub claim (example: repo:OWNER@OWNER_ID/REPO@REPO_ID)"
+  type        = string
+
+  validation {
+    condition     = startswith(var.github_oidc_sub_prefix, "repo:")
+    error_message = "github_oidc_sub_prefix must start with \"repo:\"."
+  }
+}
