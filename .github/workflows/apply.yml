@@ -20,7 +20,7 @@ concurrency:
 
 jobs:
   apply:
-    name: apply (infra)
+    name: apply
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     timeout-minutes: 45
