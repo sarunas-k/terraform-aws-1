@@ -6,6 +6,7 @@
   <title>Route 53 failover page</title>
   <style>
     :root {
+      color-scheme: light dark;
       --bg: #ffffff; --fg: #16191f; --sub: #545b64; --card: #f7f8fa; --line: #aab7b8;
       --accent: #007cbd; --mute: #7d8791; --off-fill: #eceef0;
       --purple: #8c4fff; --green: #4f7a0a; --red: #c8203a;
@@ -29,10 +30,6 @@
     .scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); }
 
     .control { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 0 0 12px; }
-    .control input, .control button { font: inherit; padding: 8px 14px; border-radius: 6px; border: 1px solid var(--line); }
-    .control input { background: var(--bg); color: var(--fg); min-width: 12rem; }
-    .control button { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; cursor: pointer; }
-    .control button:disabled { opacity: .6; cursor: progress; }
     .result { min-height: 1.5em; }
     .result[data-kind="ok"] { color: var(--green); }
     .result[data-kind="error"] { color: var(--red); }
