@@ -113,3 +113,8 @@ environment, start an instance refresh on the Auto Scaling group.
 ## Rotating the GitHub token or the passcode
 
 Repeat step 5 of [Getting started](#getting-started). The Lambda caches the secret for up to 5 minutes.
+
+## Future improvements
+
+- Run the app on EKS behind the ALB with the Auto Scaling group managing the EKS nodes instead of application instances
+- Build and deploy the app image and the failover page through CI/CD
