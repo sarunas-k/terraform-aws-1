@@ -94,16 +94,6 @@ module "auto_scaling_group" {
   }
 }
 
-resource "aws_ssm_parameter" "image_tag" {
-  name  = var.image_tag_parameter_name
-  type  = "String"
-  value = var.image_tag_initial
-
-  lifecycle {
-    ignore_changes = [value]
-  }
-
-  tags = {
-    AppRole = "compute"
-  }
+data "aws_ssm_parameter" "image_tag" {
+  name = var.image_tag_parameter_name
 }

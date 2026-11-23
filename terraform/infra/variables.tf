@@ -65,12 +65,7 @@ variable "asg_desired_capacity" {
 }
 
 variable "asg_image_tag_parameter_name" {
-  description = "Name of the SSM parameter holding the image tag the instances run"
-  type        = string
-}
-
-variable "asg_image_tag_initial" {
-  description = "Image tag stored in the SSM parameter when it is first created. Later changes are made by CI, not Terraform"
+  description = "Name of the SSM parameter holding the image tag the instances run, created in persistent/"
   type        = string
 }
 

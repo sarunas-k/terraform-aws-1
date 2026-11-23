@@ -29,7 +29,7 @@ data "aws_iam_policy_document" "ec2_app_policy" {
   statement {
     effect    = "Allow"
     actions   = ["ssm:GetParameter"]
-    resources = [aws_ssm_parameter.image_tag.arn]
+    resources = [data.aws_ssm_parameter.image_tag.arn]
   }
 }
 

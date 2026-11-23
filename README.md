@@ -30,20 +30,19 @@ See [infra/](terraform/infra/README.md) and [persistent/](terraform/persistent/R
 | `terraform-destroy` | dispatch with input `confirm` = `destroy` | `infra/` |
 
 - `bootstrap/` and `persistent/` are applied by hand
-- Apply and destroy run only from `main`, and their AWS role trusts only `main`. Protect the branch
 
 ## GitHub repository secrets and variables
 
-| Type | Name | Value | Used by |
-|---|---|---|---|
-| Secret | `AWS_TF_PLAN_ROLE_ARN` | output `github_actions_plan_role_arn` | `terraform-plan` |
-| Secret | `AWS_TF_APPLY_ROLE_ARN` | output `github_actions_apply_role_arn` | `terraform-apply`, `terraform-destroy` |
+| Type | Name | Value |
+|---|---|---|
+| Secret | `AWS_TF_PLAN_ROLE_ARN` | output `github_actions_plan_role_arn` |
+| Secret | `AWS_TF_APPLY_ROLE_ARN` | output `github_actions_apply_role_arn` |
 
 ```sh
 gh secret set AWS_TF_PLAN_ROLE_ARN --repo sarunas-k/terraform-aws-1 \
-  --body "$(terraform -chdir=terraform/persistent output -raw github_actions_plan_role_arn)"
+  --body "<github_actions_plan_role_arn>"
 gh secret set AWS_TF_APPLY_ROLE_ARN --repo sarunas-k/terraform-aws-1 \
-  --body "$(terraform -chdir=terraform/persistent output -raw github_actions_apply_role_arn)"
+  --body "<github_actions_apply_role_arn>"
 ```
 
 ## Getting started
@@ -93,31 +92,29 @@ Run these in order. Each `apply` is done by hand after reading the plan.
    infra_control_url = "<output above>"
    ```
 
-8. **Release the app image**, see below
-
-## Releasing a new app image
-
-1. Build and push the image
+8. **Build and push the app image**, writes the tag to SSM `/app/image-tag`
 
    ```sh
    src/build-and-push.sh
    ```
 
-2. Set the tag it prints in `terraform/infra/terraform.tfvars` and merge to `main`
+## Releasing a new app image
 
-   ```hcl
-   asg_image_tag_initial = "<tag>"
-   ```
+Run the script again. The tag is a hash of the source files, so unchanged code is not pushed again.
 
-The SSM parameter `/app/image-tag` belongs to `infra/`, so the daily destroy deletes it and the next
-deploy recreates it from `asg_image_tag_initial`. Changing only the SSM value is lost at the next
-destroy. Creating the parameter by hand while `infra/` is down makes the next deploy fail with
-`ParameterAlreadyExists`.
+```sh
+src/build-and-push.sh
+```
 
-While `infra/` is up, Terraform ignores changes to the parameter's value, so a new tag takes effect
-after the next destroy and deploy. To roll it out sooner, also set the SSM value and start an
-instance refresh on the Auto Scaling group.
+The SSM parameter `/app/image-tag` is created by `persistent/`, so it survives the daily destroy.
+Instances read it when they start, so a new tag runs at the next deploy. To roll it out to a running
+environment, start an instance refresh on the Auto Scaling group.
 
 ## Rotating the GitHub token or the passcode
 
 Repeat step 5 of [Getting started](#getting-started). The Lambda caches the secret for up to 5 minutes.
+
+## Future improvements
+
+- Run the app on EKS behind the ALB with the Auto Scaling group managing the EKS nodes instead of application instances
+- Build and deploy the app image and the failover page through CI/CD
