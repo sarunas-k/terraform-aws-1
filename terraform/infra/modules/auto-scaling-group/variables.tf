@@ -53,11 +53,6 @@ variable "image_tag_parameter_name" {
     description = "Name of the SSM parameter holding the image tag to run"
 }
 
-variable "image_tag_initial" {
-    type        = string
-    description = "Initial image tag to be stored in SSM parameter"
-}
-
 variable "container_port" {
     type        = number
     description = "Port the container listens on, published on the same host port"

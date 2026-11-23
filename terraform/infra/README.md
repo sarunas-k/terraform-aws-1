@@ -27,6 +27,7 @@ Applied by the pipelines.
 | `ecr_repository_name` | name of the app registry |
 | `certificate_arn` | ARN of the ALB certificate |
 | `dns_zone_name` | public zone |
+| `asg_image_tag_parameter_name` | SSM parameter with the app image tag |
 | `infra_control_url` | shut-down Lambda URL for button in the app |
 
 ## Usage
@@ -39,4 +40,4 @@ terraform plan
 terraform apply
 ```
 
-The app image tag is set by `asg_image_tag_initial`, see root [README](../../README.md#releasing-a-new-app-image).
+The app image tag is read from SSM, see root [README](../../README.md#releasing-a-new-app-image).

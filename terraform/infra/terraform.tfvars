@@ -28,7 +28,6 @@ asg_min_size                 = 3
 asg_max_size                 = 3
 asg_desired_capacity         = 3
 asg_image_tag_parameter_name = "/app/image-tag"
-asg_image_tag_initial        = "app-6295c853ed0c"
 
 # ---------------------------
 # Infra control

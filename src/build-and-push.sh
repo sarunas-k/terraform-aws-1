@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
-# Builds and pushes the app image. Needs podman and the AWS CLI.
-# Prints the tag to set as asg_image_tag_initial in terraform/infra/terraform.tfvars.
+# Builds and pushes the app image, then writes its tag to SSM.
+# Needs podman and the AWS CLI
 set -euo pipefail
 
 REGION="${AWS_REGION:-eu-north-1}"
 REPOSITORY="${REPOSITORY:-app}"
+TAG_PARAMETER="${TAG_PARAMETER:-/app/image-tag}"
 CLI="podman"
 
 cd "$(dirname "$0")"
@@ -15,6 +16,12 @@ IMAGE="${REGISTRY}/${REPOSITORY}"
 
 if ! aws ecr describe-repositories --region "${REGION}" --repository-names "${REPOSITORY}" > /dev/null 2>&1; then
   echo "ECR repository ${REPOSITORY} does not exist. Apply terraform/persistent first."
+  exit 1
+fi
+
+# Created by terraform/persistent. Writing it first would make that apply fail
+if ! aws ssm get-parameter --region "${REGION}" --name "${TAG_PARAMETER}" > /dev/null 2>&1; then
+  echo "SSM parameter ${TAG_PARAMETER} does not exist. Apply terraform/persistent first."
   exit 1
 fi
 
@@ -39,6 +46,9 @@ else
   "${CLI}" push --format v2s2 "${IMAGE}:${TAG}"
 fi
 
+aws ssm put-parameter --region "${REGION}" --name "${TAG_PARAMETER}" \
+  --type String --overwrite --value "${TAG}" > /dev/null
+
 echo
-echo "Done. Set asg_image_tag_initial = \"${TAG}\" in terraform/infra/terraform.tfvars"
-echo "Merging that to main runs the apply pipeline."
+echo "Done. SSM ${TAG_PARAMETER} = ${TAG}"
+echo "The next deploy of infra/ runs this image."
